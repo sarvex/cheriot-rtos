@@ -62,6 +62,10 @@ struct TrustedStackGeneric
 	void    *c15;
 	size_t   mstatus;
 	size_t   mcause;
+#ifdef CONFIG_MSLWM
+	uint32_t mslwm;
+	uint32_t mslwmb;
+#endif
 	uint16_t frameoffset;
 	/**
 	 * Flag indicating whether this thread is in the process of a forced
@@ -69,8 +73,12 @@ struct TrustedStackGeneric
 	 */
 	uint8_t inForcedUnwind;
 	// Padding up to multiple of 16-bytes.
-	uint8_t  pad0;
-	uint16_t padding[2];
+#ifdef CONFIG_MSLWM
+#define TRUSTED_STACK_PADDING 13
+#else
+#define TRUSTED_STACK_PADDING 5
+#endif
+	uint8_t padding[TRUSTED_STACK_PADDING];
 	/**
 	 * The trusted stack.  There is always one frame, describing the entry
 	 * point.  If this is popped then we have run off the stack and the thread

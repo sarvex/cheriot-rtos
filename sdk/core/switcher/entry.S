@@ -182,7 +182,27 @@ compartment_switcher_entry:
 	csetaddr           csp, csp, s1
 	sub                s1, s0, s1
 	csetboundsexact    csp, csp, s1
+#ifdef CONFIG_MSLWM
+	// read and align the stack low water mark
+	csrr               gp, 0xbc1 // mslwm
+	and                gp, gp, ~0xf
+	// use stack low water mark as base address for zeroing
+	// XXX could be out of bounds / unrepresentable if bad csp?
+	csetaddr           csp, csp, gp
+	// go to zeroing if the stack low water mark is less than current stack pointer
+	blt                sp, s0, zeroing
+	// otherwise reset address of csp
+	// the zeroing loop assumes sp <= s0, so make this true
+	// we want csp to end up pointing at stack top
+	csetaddr           csp, csp, s0
+	// now fall through to zeroing, which will have nothing to do
+#endif
+zeroing:
 	zero_stack         sp, s0, gp
+#ifdef CONFIG_MSLWM
+	// store new stack top as stack low water mark
+	csrw               0xbc1, sp // mslwm
+#endif
 #endif // CONFIG_NO_SWITCHER_SAFETY
 .Lout:
 	// Fetch the sealing key
@@ -315,6 +335,12 @@ exception_entry_asm:
 	csc                ct0, TrustedStack_offset_mepcc(csp)
 	csrr               t1, mstatus
 	csw                t1, TrustedStack_offset_mstatus(csp)
+#ifdef CONFIG_MSLWM
+	csrr               t1, 0xbc1 // mslwm
+	csw                t1, TrustedStack_offset_mslwm(csp)
+	csrr               t1, 0xbc2 // mslwmb
+	csw                t1, TrustedStack_offset_mslwmb(csp)
+#endif
 	csrr               t1, mcause
 	csw                t1, TrustedStack_offset_mcause(csp)
 
@@ -394,6 +420,12 @@ exception_entry_asm:
 .Linstall_context:
 	clw                x1, TrustedStack_offset_mstatus(csp)
 	csrw               mstatus, x1
+#ifdef CONFIG_MSLWM
+	clw                x1, TrustedStack_offset_mslwm(csp)
+	csrw               0xbc1, x1 // mslwm
+	clw                x1, TrustedStack_offset_mslwmb(csp)
+	csrw               0xbc2, x1 // mslwmb
+#endif
 	cspecialw          mepcc, ct2
 	csb                zero, TrustedStack_offset_inForcedUnwind(csp)
 	// c2 is csp, which will be loaded last and will overwrite the trusted
@@ -694,9 +726,21 @@ exception_entry_asm:
 	// Update the current frame offset.
 	csw                t2, TrustedStack_offset_frameoffset(ctp)
 #ifndef CONFIG_NO_SWITCHER_SAFETY
+#ifdef CONFIG_MSLWM
+	// read and align the stack low water mark
+	// we will use this as base address for stack clearing
+	// note that it cannot be greater than stack top as we 
+	// we set it to stack top when we pushed to trusted stack frame
+	csrr               tp, 0xbc1 //mslwm
+	and                tp, tp, ~0xf
+#else
 	cgetbase           tp, csp
+#endif
 	cgetaddr           t1, csp
 	csetaddr           ct2, csp, tp
 	zero_stack         t2, t1, tp
+#ifdef CONFIG_MSLWM
+	csrw               0xbc1, t2 // mslwm
+#endif
 #endif // CONFIG_NO_SWITCHER_SAFETY
 	cret
