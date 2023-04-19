@@ -811,7 +811,7 @@ namespace
 			Debug::log("New thread's trusted stack is {}", threadTStack);
 			threadTStack->mepcc = pcc;
 			threadTStack->cgp   = cgp;
-			auto stack = allocateStack(config.stackSize);
+			auto stack          = allocateStack(config.stackSize);
 			threadTStack->csp   = stack;
 			Debug::log("New thread's stack is {}", stack);
 			// Enable previous level interrupts and set the previous exception
@@ -820,7 +820,7 @@ namespace
 			  (priv::MSTATUS_MPIE |
 			   (priv::MSTATUS_PRV_M << priv::MSTATUS_MPP_SHIFT));
 #ifdef CONFIG_MSLWM
-			threadTStack->mslwm = stack.top();
+			threadTStack->mslwm  = stack.top();
 			threadTStack->mslwmb = stack.base();
 #endif
 			threadTStack->frameoffset = offsetof(TrustedStack, frames[1]);

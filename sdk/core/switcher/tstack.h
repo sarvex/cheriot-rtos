@@ -44,24 +44,24 @@ struct TrustedStackFrame
 template<size_t NFrames>
 struct TrustedStackGeneric
 {
-	void    *mepcc;
-	void    *c1;
-	void    *csp;
-	void    *cgp;
-	void    *c4;
-	void    *c5;
-	void    *c6;
-	void    *c7;
-	void    *c8;
-	void    *c9;
-	void    *c10;
-	void    *c11;
-	void    *c12;
-	void    *c13;
-	void    *c14;
-	void    *c15;
-	size_t   mstatus;
-	size_t   mcause;
+	void  *mepcc;
+	void  *c1;
+	void  *csp;
+	void  *cgp;
+	void  *c4;
+	void  *c5;
+	void  *c6;
+	void  *c7;
+	void  *c8;
+	void  *c9;
+	void  *c10;
+	void  *c11;
+	void  *c12;
+	void  *c13;
+	void  *c14;
+	void  *c15;
+	size_t mstatus;
+	size_t mcause;
 #ifdef CONFIG_MSLWM
 	uint32_t mslwm;
 	uint32_t mslwmb;
@@ -74,9 +74,9 @@ struct TrustedStackGeneric
 	uint8_t inForcedUnwind;
 	// Padding up to multiple of 16-bytes.
 #ifdef CONFIG_MSLWM
-#define TRUSTED_STACK_PADDING 13
+#	define TRUSTED_STACK_PADDING 13
 #else
-#define TRUSTED_STACK_PADDING 5
+#	define TRUSTED_STACK_PADDING 5
 #endif
 	uint8_t padding[TRUSTED_STACK_PADDING];
 	/**

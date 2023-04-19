@@ -105,11 +105,10 @@ switcher_scheduler_entry_csp:
 .endm
 
 /**
- * Zero the stack.  The three operands are the base address (modified during
- * this call, will point at the top at the end), the top address, and a scratch
- * register to use.  The base must be a capability but it must be provided
- * without the c prefix because it is used as both a capability and integer
- * register.  Top and scratch are both clobbered.
+ * Zero the stack.  The three operands are the base address, the top address,
+ * and a scratch register to use.  The base must be a capability but it must
+ * be provided without the c prefix because it is used as both a capability
+ * and integer register.  All three registers are clobbered.
  */
 .macro zero_stack base top scratch
 	addi               \scratch, \top, -32
@@ -181,24 +180,20 @@ compartment_switcher_entry:
 	cgetbase           s1, csp
 	csetaddr           csp, csp, s1
 	sub                s1, s0, s1
-	csetboundsexact    csp, csp, s1
+	csetboundsexact    ct2, csp, s1
+	csetaddr           csp, ct2, s0
 #ifdef CONFIG_MSLWM
 	// read and align the stack low water mark
 	csrr               gp, 0xbc1 // mslwm
 	and                gp, gp, ~0xf
+	// skip zeroing if low water mark >= stack poitner
+	bge                t2, sp, after_zero
 	// use stack low water mark as base address for zeroing
 	// XXX could be out of bounds / unrepresentable if bad csp?
-	csetaddr           csp, csp, gp
-	// go to zeroing if the stack low water mark is less than current stack pointer
-	blt                sp, s0, zeroing
-	// otherwise reset address of csp
-	// the zeroing loop assumes sp <= s0, so make this true
-	// we want csp to end up pointing at stack top
-	csetaddr           csp, csp, s0
-	// now fall through to zeroing, which will have nothing to do
+	csetaddr           ct2, csp, gp
 #endif
-zeroing:
-	zero_stack         sp, s0, gp
+	zero_stack         t2, s0, gp
+after_zero:
 #ifdef CONFIG_MSLWM
 	// store new stack top as stack low water mark
 	csrw               0xbc1, sp // mslwm
@@ -740,7 +735,7 @@ exception_entry_asm:
 	csetaddr           ct2, csp, tp
 	zero_stack         t2, t1, tp
 #ifdef CONFIG_MSLWM
-	csrw               0xbc1, t2 // mslwm
+	csrw               0xbc1, sp // mslwm
 #endif
 #endif // CONFIG_NO_SWITCHER_SAFETY
 	cret
