@@ -819,9 +819,9 @@ namespace
 			threadTStack->mstatus =
 			  (priv::MSTATUS_MPIE |
 			   (priv::MSTATUS_PRV_M << priv::MSTATUS_MPP_SHIFT));
-#ifdef CONFIG_MSLWM
-			threadTStack->mslwm  = stack.top();
-			threadTStack->mslwmb = stack.base();
+#ifdef CONFIG_MSHWM
+			threadTStack->mshwm  = stack.top();
+			threadTStack->mshwmb = stack.base();
 #endif
 			threadTStack->frameoffset = offsetof(TrustedStack, frames[1]);
 			threadTStack->frames[0].calleeExportTable =

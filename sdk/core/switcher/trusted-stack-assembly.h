@@ -21,9 +21,9 @@ EXPORT_ASSEMBLY_OFFSET(TrustedStack, c14, 14 * 8)
 EXPORT_ASSEMBLY_OFFSET(TrustedStack, c15, 15 * 8)
 EXPORT_ASSEMBLY_OFFSET(TrustedStack, mstatus, 16 * 8)
 EXPORT_ASSEMBLY_OFFSET(TrustedStack, mcause, (16 * 8) + 4)
-#ifdef CONFIG_MSLWM
-EXPORT_ASSEMBLY_OFFSET(TrustedStack, mslwm, 17 * 8)
-EXPORT_ASSEMBLY_OFFSET(TrustedStack, mslwmb, (17 * 8) + 4)
+#ifdef CONFIG_MSHWM
+EXPORT_ASSEMBLY_OFFSET(TrustedStack, mshwm, 17 * 8)
+EXPORT_ASSEMBLY_OFFSET(TrustedStack, mshwmb, (17 * 8) + 4)
 
 // Size of everything up to this point
 #define TSTACK_REGFRAME_SZ (18 * 8)

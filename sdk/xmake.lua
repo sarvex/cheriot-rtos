@@ -16,11 +16,6 @@ option("scheduler-accounting")
 	set_description("Track per-thread cycle counts in the scheduler");
 	set_showmenu(true)
 
-option("stack-low-water-mark")
-	set_default(false)
-	set_description("Build with support for stack low water mark");
-	set_showmenu(true)
-
 function debugOption(name)
 	option("debug-" .. name)
 		set_default(false)
@@ -237,8 +232,9 @@ rule("firmware")
 			add_defines("SIMULATION")
 		end
 
-		if get_config("stack-low-water-mark") then
-			add_defines("CONFIG_MSLWM")
+		if board.stack_high_water_mark then
+			print("using stack high water mark")
+			add_defines("CONFIG_MSHWM")
 		end
 
 		-- Build the MMIO space for the board
