@@ -40,7 +40,7 @@ def get_names(options):
             prev_name = name
             prev_addr = addr
         else:
-            prev_name = prev_name + '/' + name
+            prev_name = f'{prev_name}/{name}'
     unique_names.append((prev_addr, prev_name))
     print("Loaded names.")
     return unique_names
@@ -55,8 +55,7 @@ def annotate_trace(options):
     else:
         trace_file=open(options.trace_file, 'r')
     for line in trace_file:
-        m = trace_re.search(line)
-        if m:
+        if m := trace_re.search(line):
             addr=int(m.group('pc'), 16)
             i = bisect.bisect_right(addresses, addr)-1
             sym = syms[i]
